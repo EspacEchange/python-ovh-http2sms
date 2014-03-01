@@ -18,6 +18,6 @@ http://guides.ovh.com/Http2Sms
     print hSMS.sendTo('+33223344555')
     print hSMS.sendTo(['+33223344555', '+33223344666', '+33223344777'])
     
-    # Send message containing variables --> \*|var_name|\*
+    # Send message containing variables --> *|var_name|*
     hSMS.setMessage("Hello *|name|*,\n\n How are you?")
     print hSMS.sendTo({'+33223344555' : {'name' : 'Thibault'}, '+33223344666' : {'name' : 'Eleanore'}})
