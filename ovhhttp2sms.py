@@ -12,7 +12,7 @@ class   OvhHttp2Sms(object):
 
     How to use:
        # Instanciate + settings
-       hSMS = OvhSms(account = 'sms-nic-X', login = 'my_login', password = 'my_pa33w0rd')
+       hSMS = OvhHttp2Sms(account = 'sms-nic-X', login = 'my_login', password = 'my_pa33w0rd')
        hSMS.setOptions(sender='Thibault', no_stop=1)
 
        # Send simple message
