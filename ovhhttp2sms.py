@@ -13,7 +13,7 @@ class   OvhHttp2Sms(object):
     How to use:
        # Instanciate + settings
        hSMS = OvhHttp2Sms(account = 'sms-nic-X', login = 'my_login', password = 'my_pa33w0rd')
-       hSMS.setOptions(sender='Thibault', no_stop=1)
+       hSMS.setOptions(sender = 'Thibault', no_stop = 1)
 
        # Send simple message
        hSMS.setMessage("Hello,\n\n How are you?")
@@ -35,10 +35,11 @@ class   OvhHttp2Sms(object):
         'tag'       : '__opt_set_tag',
     }
     __SEND_METHOD = {
-        type('') : '__send_from_string',
-        type([]) : '__send_from_list',
-        type(()) : '__send_from_list',
-        type({}) : '__send_from_dict',
+        type('')  : '__send_from_string',
+        type(u'') : '__send_from_string',
+        type([])  : '__send_from_list',
+        type(())  : '__send_from_list',
+        type({})  : '__send_from_dict',
     }
 
     def __init__(self, account, login, password):
