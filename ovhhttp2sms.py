@@ -86,7 +86,7 @@ class   OvhHttp2Sms(object):
         return {data: self.__call_ovh_url(data, self.__message)}
 
     def __send_from_list(self, data):
-        data = [x for i,x in enumerate(data) if x not in data[i+1:]]
+        data = [x for i, x in enumerate(data) if x not in data[(i + 1):]]
         dic_ret_val = {}
         for d in data:
             dic_ret_val[d] = self.__call_ovh_url(d, self.__message)
