@@ -1,62 +1,66 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
 from datetime import datetime
 from json import loads
-import requests
 import re
 
+import requests
 
-class   OvhHttp2Sms(object):
-    '''
+
+class OvhHttp2Sms():
+    """
     API Documentation:
        http://guides.ovh.com/Http2Sms
 
     How to use:
        # Instanciate + settings
-       hSMS = OvhHttp2Sms(account = 'sms-nic-X', login = 'my_login', password = 'my_pa33w0rd')
-       hSMS.setOptions(sender = 'Thibault', no_stop = 1)
+       hSMS = OvhHttp2Sms(account='sms-nic-X', login='my_login',
+                          password='my_pa33w0rd')
+       hSMS.set_options(sender='Thibault', no_stop=1)
 
        # Send simple message
-       hSMS.setMessage("Hello,\n\n How are you?")
-       print hSMS.sendTo('+33223344555')
-       print hSMS.sendTo(['+33223344555', '+33223344666', '+33223344777'])
+       hSMS.set_message("Hello,\n\n How are you?")
+       print hSMS.send_to('+33223344555')
+       print hSMS.send_to(['+33223344555', '+33223344666', '+33223344777'])
 
        # Send message containing variables --> *|var_name|*
-       hSMS.setMessage("Hello *|name|*,\n\n How are you?")
-       print hSMS.sendTo({'+33223344555' : {'name' : 'Thibault'},
-                          '+33223344666' : {'name' : 'Eleanore'}})
-    '''
+       hSMS.set_message("Hello *|name|*,\n\n How are you?")
+       print hSMS.send_to({'+33223344555': {'name': 'Thibault'},
+                           '+33223344666': {'name': 'Eleanore'}})
+    """
 
     __OVH_HTTP2SMS_URL = 'https://www.ovh.com/cgi-bin/sms/http2sms.cgi?'
     __OVH_HTTP2SMS_OPT = {
-        'sender'    : '__opt_set_sender',
-        'no_stop'   : '__opt_set_no_stop',
-        'defered'   : '__opt_set_defered',
-        'sms_class' : '__opt_set_sms_class',
-        'tag'       : '__opt_set_tag',
+        'sender': '__opt_set_sender',
+        'no_stop': '__opt_set_no_stop',
+        'deferred': '__opt_set_deferred',
+        'sms_class': '__opt_set_sms_class',
+        'tag': '__opt_set_tag',
     }
     __SEND_METHOD = {
-        type('')  : '__send_from_string',
-        type(u'') : '__send_from_string',
-        type([])  : '__send_from_list',
-        type(())  : '__send_from_list',
-        type({})  : '__send_from_dict',
+        type(''): '__send_from_string',
+        type(u''): '__send_from_string',
+        type([]): '__send_from_list',
+        type(()): '__send_from_list',
+        type({}): '__send_from_dict',
     }
 
     def __init__(self, account, login, password):
         self.__request_opt = {
-            'account'  : account,
-            'login'    : login,
-            'password' : password,
-            'from'     : None,
-            'noStop'   : None,
-            'deferred' : None,
-            'tag'      : None,
-            'class'    : 1
+            'account': account,
+            'login': login,
+            'password': password,
+            'from': None,
+            'noStop': None,
+            'deferred': None,
+            'tag': None,
+            'class': 1
         }
 
-    def     __regexp_reverse(self, data, dict):
-        hReg = re.compile('\*\|(.+?)\|\*', re.VERBOSE)
-        return hReg.sub(lambda m : dict.get(m.group(1), ''), data)
+    def __regexp_reverse(self, data, dict):
+        hreg = re.compile('\*\|(.+?)\|\*', re.VERBOSE)
+        return hreg.sub(lambda m: dict.get(m.group(1), ''), data)
 
     def __opt_set_sender(self, data):
         assert type(data) == str
@@ -65,17 +69,17 @@ class   OvhHttp2Sms(object):
     def __opt_set_no_stop(self, data):
         assert type(data) == int
         if data not in [0, 1]:
-            raise Exception('"%(opt_data)d" is not a valid choice' % {'opt_data' : data})
+            raise Exception('"%(opt_data)d" is not a valid choice' % {'opt_data': data})
         self.__request_opt['noStop'] = data
 
-    def __opt_set_defered(self, data):
+    def __opt_set_deferred(self, data):
         assert type(data) == datetime
-        self.__request_opt['defered'] = data.strftime('COUCOU')
+        self.__request_opt['deferred'] = data.strftime('%H%M%d%m%Y')
 
     def __opt_set_sms_class(self, data):
         assert type(data) == int
         if data not in [0, 1, 2, 3]:
-            raise Exception('"%(opt_data)d" is not a valid choice' % {'opt_data' : data})
+            raise Exception('"%(opt_data)d" is not a valid choice' % {'opt_data': data})
         self.__request_opt['class'] = data
 
     def __opt_set_sms_tag(self, data):
@@ -102,28 +106,28 @@ class   OvhHttp2Sms(object):
     def __call_ovh_url(self, to, message):
         if to.startswith('+') is True:
             to = to.replace('+', '%2B')
-        req = '%(base_url)scontentType=text/json&%(opt)s&to=%(to)s&message=%(msg)s' % {'base_url' : self.__OVH_HTTP2SMS_URL,
-                                                                                       'opt'      : '&'.join(self.__for_url_opt),
-                                                                                       'msg'      : message,
-                                                                                       'to'       : to}
+        req = ('%(base_url)scontentType=text/json&%(opt)s&to=%(to)s&message=%(msg)s' %
+               {'base_url': self.__OVH_HTTP2SMS_URL,
+                'opt': '&'.join(self.__for_url_opt), 'to': to, 'msg': message})
         ret_val = requests.get(req)
         return loads(ret_val.text)
 
-    def setMessage(self, msg):
+    def set_message(self, msg):
         self.__message = msg.strip().replace('\n', '%0D').replace('<br>', '%0D').replace('<br/>', '%0D')
 
-    def setOptions(self, **kwargs):
+    def set_options(self, **kwargs):
         for k, v in kwargs.iteritems():
             try:
-                call = getattr(self, '_%(cls_name)s%(func_name)s' % {'cls_name'  : self.__class__.__name__,
-                                                                     'func_name' : self.__OVH_HTTP2SMS_OPT[k]})
+                call = getattr(self, '_%(cls_name)s%(func_name)s' % {'cls_name': self.__class__.__name__,
+                                                                     'func_name': self.__OVH_HTTP2SMS_OPT[k]})
                 call(v)
             except KeyError:
-                raise Exception('Unknown option "%(opt_name)s"' % {'opt_name' : k})
+                raise Exception('Unknown option "%(opt_name)s"' % {'opt_name': k})
 
-    def sendTo(self, dst):
+    def send_to(self, dst):
         self.__for_url_opt = []
-        map(lambda o: self.__for_url_opt.append('%s=%s' % (o[0], o[1])) if o[1] is not None else None, self.__request_opt.iteritems())
-        call = getattr(self, '_%(cls_name)s%(func_name)s' % {'cls_name'  : self.__class__.__name__,
-                                                             'func_name' : self.__SEND_METHOD[type(dst)]})
+        map(lambda o: self.__for_url_opt.append('%s=%s' % (o[0], o[1]))
+            if o[1] is not None else None, self.__request_opt.iteritems())
+        call = getattr(self, '_%(cls_name)s%(func_name)s' % {'cls_name': self.__class__.__name__,
+                                                             'func_name': self.__SEND_METHOD[type(dst)]})
         return call(dst)
